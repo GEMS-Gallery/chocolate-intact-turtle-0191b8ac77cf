@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { backend } from 'declarations/backend';
+import { Box, Container, Grid, Paper, Typography, List, ListItem, ListItemText, ListItemButton, TextField, Button, IconButton } from '@mui/material';
+import { Add as AddIcon, Delete as DeleteIcon } from '@mui/icons-material';
+import { CSSTransition, TransitionGroup } from 'react-transition-group';
 
 const categories = [
   { id: 1, name: 'Work' },
@@ -56,62 +59,70 @@ export default function App() {
     }
   };
 
-  if (isLoading) {
-    return <div className="flex justify-center items-center h-screen">Loading...</div>;
-  }
-
   return (
-    <div className="flex h-screen bg-gray-100">
-      <div className="w-64 bg-white shadow-md">
-        <h2 className="text-lg font-semibold p-4 border-b">Categories</h2>
-        <ul>
-          {categories.map(category => (
-            <li
-              key={category.id}
-              className={`p-3 cursor-pointer hover:bg-gray-100 ${selectedCategory.id === category.id ? 'bg-blue-100' : ''}`}
-              onClick={() => setSelectedCategory(category)}
-            >
-              {category.name}
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <div className="flex-1 p-8">
-        <h1 className="text-3xl font-bold mb-6">Task List</h1>
-        
-        <div className="flex mb-4">
-          <input
-            type="text"
-            value={newTask}
-            onChange={(e) => setNewTask(e.target.value)}
-            className="flex-1 p-2 border rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Add a new task..."
-          />
-          <button
-            onClick={addTask}
-            className="bg-blue-500 text-white p-2 rounded-r-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            Add
-          </button>
-        </div>
-
-        <ul className="space-y-2">
-          {tasks
-            .filter(task => task.category === selectedCategory.id)
-            .map(task => (
-              <li key={task.id} className="flex items-center justify-between bg-white p-3 rounded-md shadow">
-                <span>{task.text}</span>
-                <button
-                  onClick={() => deleteTask(task.id)}
-                  className="text-red-500 hover:text-red-700 focus:outline-none"
+    <Container maxWidth="lg" sx={{ mt: 4 }}>
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={3}>
+          <Paper elevation={3} sx={{ p: 2 }}>
+            <Typography variant="h6" gutterBottom>Categories</Typography>
+            <List>
+              {categories.map((category) => (
+                <ListItemButton
+                  key={category.id}
+                  selected={selectedCategory.id === category.id}
+                  onClick={() => setSelectedCategory(category)}
                 >
-                  Delete
-                </button>
-              </li>
-            ))}
-        </ul>
-      </div>
-    </div>
+                  <ListItemText primary={category.name} />
+                </ListItemButton>
+              ))}
+            </List>
+          </Paper>
+        </Grid>
+        <Grid item xs={12} md={9}>
+          <Paper elevation={3} sx={{ p: 2 }}>
+            <Typography variant="h6" gutterBottom>Tasks</Typography>
+            <Box sx={{ display: 'flex', mb: 2 }}>
+              <TextField
+                fullWidth
+                variant="outlined"
+                size="small"
+                value={newTask}
+                onChange={(e) => setNewTask(e.target.value)}
+                placeholder="Add a new task..."
+                sx={{ mr: 1 }}
+              />
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={addTask}
+                disabled={isLoading}
+                startIcon={<AddIcon />}
+              >
+                Add
+              </Button>
+            </Box>
+            <List>
+              <TransitionGroup>
+                {tasks
+                  .filter(task => task.category === selectedCategory.id)
+                  .map(task => (
+                    <CSSTransition key={task.id} timeout={300} classNames="fade">
+                      <ListItem
+                        secondaryAction={
+                          <IconButton edge="end" aria-label="delete" onClick={() => deleteTask(task.id)}>
+                            <DeleteIcon />
+                          </IconButton>
+                        }
+                      >
+                        <ListItemText primary={task.text} />
+                      </ListItem>
+                    </CSSTransition>
+                  ))}
+              </TransitionGroup>
+            </List>
+          </Paper>
+        </Grid>
+      </Grid>
+    </Container>
   );
 }
